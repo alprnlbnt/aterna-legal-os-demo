@@ -2,6 +2,12 @@
 
 Bu klasör, Aterna Legal OS ürün davranışlarını göstermek için hazırlanmış React + Vite + TypeScript demosudur. Production uygulaması, güvenlik mimarisi veya entegrasyon örneği değildir. Tüm kişi, dosya, belge, mahkeme, finans ve audit verileri kurgudur.
 
+## Canlı demo
+
+https://alprnlbnt.github.io/aterna-legal-os-demo/
+
+Bu proje tamamen sentetik verili, entegrasyonsuz ürün tasarım demosudur.
+
 ## Çalıştırma
 
 Node.js 20+ önerilir.
