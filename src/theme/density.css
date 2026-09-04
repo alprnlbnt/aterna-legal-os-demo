@@ -1,0 +1,10 @@
+body[data-density='ferah'] {
+  --density-space: 20px;
+}
+
+@media (max-width: 640px) {
+  body[data-density='ferah'],
+  body[data-density='siki'] {
+    --density-space: 16px;
+  }
+}
