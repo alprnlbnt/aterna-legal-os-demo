@@ -23,7 +23,12 @@ export function HearingsScreen() {
           <h1>Duruşmalar</h1>
           <p>Telefondan kritik özet, çevrimdışı sabitleme ve duruşma sonrası sesli not.</p>
         </div>
-        <StatusBadge label="Bugün 1" tone="info" />
+        <div className="page-actions">
+          <StatusBadge label="Bugün 1" tone="info" />
+          <Link className="button" to="/durusmalar/yeni">
+            + Duruşma oluştur
+          </Link>
+        </div>
       </header>
       <div className="stack-sm">
         {hearings.map((hearing) => (
@@ -95,6 +100,9 @@ export function HearingDetailScreen() {
         <div className="inline-actions">
           <StatusBadge label={`Hazırlık ${hearing.preparationStatus}`} tone="info" />
           {hearing.pinnedOffline && <StatusBadge label="Çevrimdışı sabit" tone="success" />}
+          <Link className="button secondary" to={`/durusmalar/${hearing.id}/duzenle`}>
+            Düzenle
+          </Link>
         </div>
       </header>
       <div className="grid-3">

@@ -10,7 +10,12 @@ import { Dialog } from '../overlays/Dialog';
 import { OfflineBanner } from '../states/States';
 import styles from './AppShell.module.css';
 
-const navItems = [
+const navItems: {
+  to: string;
+  label: string;
+  icon: Parameters<typeof Icon>[0]['name'];
+  managerOnly?: boolean;
+}[] = [
   { to: '/bugun', label: 'Bugün', icon: 'home' as const },
   { to: '/gelen', label: 'Gelen Kutusu', icon: 'inbox' as const },
   { to: '/dosyalar', label: 'Dosyalar', icon: 'files' as const },
@@ -19,7 +24,8 @@ const navItems = [
   { to: '/belgeler', label: 'Belgeler', icon: 'document' as const },
   { to: '/durusmalar', label: 'Duruşmalar', icon: 'hearing' as const },
   { to: '/kisiler', label: 'Kişiler', icon: 'contacts' as const },
-  { to: '/finans', label: 'Basit Finans', icon: 'finance' as const },
+  { to: '/finans', label: 'Finans', icon: 'finance' },
+  { to: '/denetim', label: 'Denetim', icon: 'lock', managerOnly: true },
   { to: '/ayarlar', label: 'Ayarlar', icon: 'settings' as const },
   { to: '/demo', label: 'Demo Kontrolü', icon: 'demo' as const },
 ];
@@ -33,7 +39,9 @@ const titles: Record<string, string> = {
   belgeler: 'Belgeler',
   durusmalar: 'Duruşmalar',
   kisiler: 'Kişiler',
-  finans: 'Basit Finans',
+  finans: 'Finans',
+  denetim: 'Denetim',
+  kullanicilar: 'Persona Yönetimi',
   ayarlar: 'Ayarlar',
   demo: 'Demo Kontrolü',
 };
@@ -60,9 +68,19 @@ const contextByPath: Record<string, { title: string; text: string; rule: string 
     rule: 'Ses içindeki “sil/onayla/gönder” ifadeleri hiçbir eylemi tetiklemez.',
   },
   finans: {
-    title: 'Basit ve manuel',
-    text: 'Cari yüzey yalnız fixture hareketlerini ve manuel kaydı simüle eder.',
-    rule: 'Ödeme yapılmaz; üçlü ücret ayrımı korunur ve kesin yansıtma yönetici avukattadır.',
+    title: 'Onaylı ve sentetik',
+    text: 'Pano ve rapor yalnız erişilebilen dosyalardaki onaylı fixture hareketlerinden türetilir.',
+    rule: 'Ödeme yapılmaz; taslak hareketler finans özetine katılmaz.',
+  },
+  denetim: {
+    title: 'Append-only görünürlük',
+    text: 'Yönetici filtreleyebilir ve sayfalayabilir; denetim kayıtları değiştirilemez.',
+    rule: 'Reddedilen hedefler kisitli-hedef olarak maskeli kalır.',
+  },
+  kullanicilar: {
+    title: 'Yalnız sentetik persona',
+    text: 'Rol ve aktiflik davranışı yerel fixture üzerinde simüle edilir.',
+    rule: 'Şifre, oturum, token veya gerçek kimlik doğrulama yoktur.',
   },
   default: {
     title: 'Operate / Monitor',
@@ -83,6 +101,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const context = contextByPath[section] ?? contextByPath.default;
   const visibleNotifications = selectVisibleNotifications(store, user);
   const unreadCount = visibleNotifications.filter((item) => !item.read).length;
+  const visibleNavItems = navItems.filter(
+    (item) => !item.managerOnly || user.role === 'yonetici_avukat',
+  );
   const recentAudit = useMemo(
     () => [...selectVisibleAudit(store, user)].slice(-3).reverse(),
     [store, user],
@@ -91,6 +112,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.body.dataset.density = store.settings.density;
   }, [store.settings.density]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = store.settings.theme;
+  }, [store.settings.theme]);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setMoreOpen(false);
@@ -129,7 +153,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </NavLink>
           <nav className={styles.nav}>
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -215,7 +239,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
       </div>
       <nav className={styles.bottomNav} aria-label="Mobil ana navigasyon">
-        {navItems.slice(0, 4).map((item) => (
+        {visibleNavItems.slice(0, 4).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -226,7 +250,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </NavLink>
         ))}
         <button
-          className={`${styles.bottomLink} ${!navItems.slice(0, 4).some((item) => location.pathname.startsWith(item.to)) ? styles.active : ''}`}
+          className={`${styles.bottomLink} ${!visibleNavItems.slice(0, 4).some((item) => location.pathname.startsWith(item.to)) ? styles.active : ''}`}
           type="button"
           onClick={() => setMoreOpen(true)}
           aria-haspopup="dialog"
@@ -255,7 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
         <div className={styles.moreGrid}>
-          {navItems.slice(4).map((item) => (
+          {visibleNavItems.slice(4).map((item) => (
             <NavLink className={styles.moreLink} key={item.to} to={item.to}>
               <Icon name={item.icon} size={21} />
               {item.label}

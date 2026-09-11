@@ -26,9 +26,7 @@ export function VoiceRecorder({
     <section className="recorder" aria-label="Sentetik sesli not kaydı">
       <div className="recorder-display">
         <div>
-          <span className="eyebrow" style={{ color: '#a7c5c7' }}>
-            Orijinal ses · Cihaza kayıt yapılmaz
-          </span>
+          <span className="eyebrow recorder-eyebrow">Orijinal ses · Cihaza kayıt yapılmaz</span>
           <strong>
             {state === 'idle' ? 'Kayıt hazır' : state === 'complete' ? 'Kayıt tamamlandı' : display}
           </strong>

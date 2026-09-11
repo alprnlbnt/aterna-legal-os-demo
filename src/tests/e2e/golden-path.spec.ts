@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.clear());
   await page.goto('/#/bugun');
 });
 
@@ -89,5 +90,9 @@ test('uygulama dış hosta network isteği yapmaz', async ({ page }) => {
   await page.goto('/#/bugun');
   await page.goto('/#/gelen/evrak-001');
   await page.goto('/#/belgeler/belge-teklif-2');
+  await page.goto('/#/finans');
+  await page.goto('/#/finans/rapor/onizleme?year=2026');
+  await page.goto('/#/denetim');
+  await page.goto('/#/kullanicilar');
   expect(external).toEqual([]);
 });

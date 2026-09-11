@@ -17,36 +17,38 @@ export function AuditTable({ entries, users }: { entries: AuditEntry[]; users: U
           </tr>
         </thead>
         <tbody>
-          {[...entries].reverse().map((entry) => (
-            <tr key={entry.id}>
-              <td>{formatDate(entry.time, true)}</td>
-              <td>
-                <strong>{entry.action}</strong>
-                <br />
-                <StatusBadge label="Append-only" tone="neutral" />
-              </td>
-              <td>
-                {users.find((user) => user.id === entry.actorId)?.name ?? entry.actorId}
-                <br />
-                <span className="micro muted">{entry.actorRole}</span>
-              </td>
-              <td>
-                {entry.objectType}
-                <br />
-                <span className="micro muted">{entry.objectId}</span>
-              </td>
-              <td>
-                {entry.previousValue && (
-                  <>
-                    <span className="muted">{entry.previousValue}</span> →{' '}
-                  </>
-                )}
-                {entry.nextValue}
-                <br />
-                <span className="micro muted">{entry.reason}</span>
-              </td>
-            </tr>
-          ))}
+          {[...entries]
+            .sort((left, right) => right.time.localeCompare(left.time))
+            .map((entry) => (
+              <tr key={entry.id}>
+                <td>{formatDate(entry.time, true)}</td>
+                <td>
+                  <strong>{entry.action}</strong>
+                  <br />
+                  <StatusBadge label="Append-only" tone="neutral" />
+                </td>
+                <td>
+                  {users.find((user) => user.id === entry.actorId)?.name ?? entry.actorId}
+                  <br />
+                  <span className="micro muted">{entry.actorRole}</span>
+                </td>
+                <td>
+                  {entry.objectType}
+                  <br />
+                  <span className="micro muted">{entry.objectId}</span>
+                </td>
+                <td>
+                  {entry.previousValue && (
+                    <>
+                      <span className="muted">{entry.previousValue}</span> →{' '}
+                    </>
+                  )}
+                  {entry.nextValue}
+                  <br />
+                  <span className="micro muted">{entry.reason}</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

@@ -1,13 +1,28 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StatusBadge, statusPresentation } from '../components/forms/StatusBadge';
 import { UnauthorizedState } from '../components/states/States';
 import { canAccessFile } from '../store/invariants';
 import { currentUser, selectVisibleContacts } from '../store/selectors';
 import { useStore } from '../store/useStore';
+import { useTableFilter } from '../lib/table';
+
+type ContactFilter = 'all' | 'muvekkil' | 'aday' | 'karsi_taraf';
 
 export function ContactsScreen() {
   const store = useStore();
   const contacts = selectVisibleContacts(store);
+  const [query, setQuery] = useState('');
+  const [kind, setKind] = useState<ContactFilter>('all');
+  const filtered = useTableFilter(
+    contacts,
+    { query, kind },
+    (contact, filters) =>
+      (filters.kind === 'all' || contact.kind === filters.kind) &&
+      `${contact.name} ${contact.communication}`
+        .toLocaleLowerCase('tr-TR')
+        .includes(filters.query.trim().toLocaleLowerCase('tr-TR')),
+  );
   return (
     <div className="stack">
       <header className="page-header">
@@ -19,13 +34,44 @@ export function ContactsScreen() {
             üretir.
           </p>
         </div>
-        <button className="button" type="button">
-          + Kişi taslağı
-        </button>
+        <Link className="button" to="/kisiler/yeni">
+          + Kişi oluştur
+        </Link>
       </header>
+      <section className="card stack-sm" aria-label="Kişi arama ve filtreleri">
+        <label className="field">
+          <span>Kişilerde ara</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Ad veya iletişim"
+          />
+        </label>
+        <div className="chip-row" aria-label="Kişi türü">
+          {(
+            [
+              ['all', 'Tümü'],
+              ['muvekkil', 'Müvekkil'],
+              ['aday', 'Aday'],
+              ['karsi_taraf', 'Karşı taraf'],
+            ] as [ContactFilter, string][]
+          ).map(([value, label]) => (
+            <button
+              className="chip"
+              type="button"
+              aria-pressed={kind === value}
+              key={value}
+              onClick={() => setKind(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
       <section className="panel">
         <div className="panel-body">
-          {contacts.map((contact) => (
+          {filtered.map((contact) => (
             <Link className="list-row" to={`/kisiler/${contact.id}`} key={contact.id}>
               <span className="contact-avatar">
                 {contact.name
@@ -50,6 +96,9 @@ export function ContactsScreen() {
               <span aria-hidden="true">›</span>
             </Link>
           ))}
+          {filtered.length === 0 && (
+            <p className="muted">Bu arama ve tür filtresiyle eşleşen kişi yok.</p>
+          )}
         </div>
       </section>
     </div>
@@ -90,10 +139,15 @@ export function ContactDetailScreen() {
           <h1>{contact.name}</h1>
           <p>{contact.communication}</p>
         </div>
-        <StatusBadge
-          label={contact.kind.replace('_', ' ')}
-          tone={contact.kind === 'aday' ? 'candidate' : 'info'}
-        />
+        <div className="page-actions">
+          <StatusBadge
+            label={contact.kind.replace('_', ' ')}
+            tone={contact.kind === 'aday' ? 'candidate' : 'info'}
+          />
+          <Link className="button secondary" to={`/kisiler/${contact.id}/duzenle`}>
+            Kişiyi düzenle
+          </Link>
+        </div>
       </header>
       {contact.conflictFlag && (
         <div className="notice warning">

@@ -2,6 +2,7 @@ export type Role = 'yonetici_avukat' | 'calisan_avukat' | 'sekreter' | 'stajyer'
 export type Density = 'ferah' | 'siki';
 export type ApprovalLevel = 'tek' | 'toplu' | 'bilgi';
 export type StatusTone = 'candidate' | 'pending' | 'success' | 'danger' | 'neutral' | 'info';
+export type Theme = 'light' | 'dark';
 
 export interface Office {
   id: string;
@@ -18,6 +19,8 @@ export interface User {
   shortName: string;
   role: Role;
   authorizedFileIds: string[];
+  active: boolean;
+  email?: string;
 }
 
 export interface Contact {
@@ -131,6 +134,9 @@ export interface Task {
   dependentTaskIds: string[];
   sourceCandidateId?: string;
   subtaskIds: string[];
+  origin: 'aday' | 'manuel';
+  reminderAt?: string;
+  completedAt?: string;
 }
 
 export interface Deadline {
@@ -194,6 +200,7 @@ export interface Hearing {
   preparationReport?: { title: string; text: string; source: string }[];
   voiceNoteIds: string[];
   pinnedOffline: boolean;
+  reminderLeadHours?: number;
 }
 
 export interface VoiceNote {
@@ -251,6 +258,12 @@ export interface DemoSettings {
   tourStep: number;
   lastSyncAt: string;
   screenState: 'default' | 'loading' | 'empty' | 'error';
+  theme: Theme;
+  notificationPrefs: {
+    taskReminderLeadDays: number[];
+    hearingReminderLeadDays: number[];
+    muted: boolean;
+  };
 }
 
 export interface DemoData {

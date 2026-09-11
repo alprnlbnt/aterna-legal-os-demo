@@ -56,6 +56,130 @@ export function SettingsScreen() {
           </div>
         </article>
       </section>
+      <section className="grid-2">
+        <article className="card stack-sm">
+          <span className="eyebrow">Token tabanlı görünüm</span>
+          <h2>Tema</h2>
+          <div className="segmented" aria-label="Tema seçimi">
+            {(
+              [
+                ['light', 'Açık'],
+                ['dark', 'Koyu'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                className="chip"
+                type="button"
+                key={value}
+                aria-pressed={store.settings.theme === value}
+                onClick={() => feedback.run(() => store.setTheme(value), `${label} tema seçildi.`)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </article>
+        <article className="card stack-sm">
+          <span className="eyebrow">Kişisel yerel tercih</span>
+          <h2>Bildirim ve hatırlatma</h2>
+          <fieldset className="stack-sm">
+            <legend className="field-label">Görev hatırlatması</legend>
+            <div className="chip-row">
+              {[1, 3, 7].map((day) => {
+                const selected =
+                  store.settings.notificationPrefs.taskReminderLeadDays.includes(day);
+                return (
+                  <button
+                    className="chip"
+                    type="button"
+                    key={day}
+                    aria-pressed={selected}
+                    onClick={() =>
+                      feedback.run(
+                        () =>
+                          store.setNotificationPrefs({
+                            taskReminderLeadDays: selected
+                              ? store.settings.notificationPrefs.taskReminderLeadDays.filter(
+                                  (value) => value !== day,
+                                )
+                              : [
+                                  ...store.settings.notificationPrefs.taskReminderLeadDays,
+                                  day,
+                                ].sort((left, right) => left - right),
+                          }),
+                        'Görev hatırlatma tercihi kaydedildi.',
+                      )
+                    }
+                  >
+                    {day} gün önce
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <fieldset className="stack-sm">
+            <legend className="field-label">Duruşma hatırlatması</legend>
+            <div className="chip-row">
+              {[1, 3, 7].map((day) => {
+                const selected =
+                  store.settings.notificationPrefs.hearingReminderLeadDays.includes(day);
+                return (
+                  <button
+                    className="chip"
+                    type="button"
+                    key={day}
+                    aria-pressed={selected}
+                    onClick={() =>
+                      feedback.run(
+                        () =>
+                          store.setNotificationPrefs({
+                            hearingReminderLeadDays: selected
+                              ? store.settings.notificationPrefs.hearingReminderLeadDays.filter(
+                                  (value) => value !== day,
+                                )
+                              : [
+                                  ...store.settings.notificationPrefs.hearingReminderLeadDays,
+                                  day,
+                                ].sort((left, right) => left - right),
+                          }),
+                        'Duruşma hatırlatma tercihi kaydedildi.',
+                      )
+                    }
+                  >
+                    {day} gün önce
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={store.settings.notificationPrefs.muted}
+              onChange={(event) =>
+                feedback.run(
+                  () => store.setNotificationPrefs({ muted: event.target.checked }),
+                  event.target.checked
+                    ? 'Sessiz bildirim tercihi açıldı.'
+                    : 'Sessiz bildirim tercihi kapandı.',
+                )
+              }
+            />
+            <span>Sessiz bildirimleri kullan</span>
+          </label>
+          <div className="chip-row" aria-label="Devre dışı gerçek kanallar">
+            <button className="chip" type="button" disabled>
+              E-posta kapalı
+            </button>
+            <button className="chip" type="button" disabled>
+              SMS kapalı
+            </button>
+          </div>
+          <p className="small muted">
+            Demo — gerçek gönderim yok; kilit ekranı içeriği her zaman güvenli ve içeriksizdir.
+          </p>
+        </article>
+      </section>
       <section className="stack-sm">
         <div className="section-heading">
           <div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { WorkCard } from '../components/cards/WorkCard';
 import { DecisionSurface } from '../components/approval/DecisionSurface';
 import { AiStrip } from '../components/forms/AiStrip';
@@ -15,6 +15,7 @@ type TaskView = 'onay' | 'gorevler' | 'reddedilen';
 export function TasksScreen() {
   const store = useStore();
   const user = currentUser(store);
+  const feedback = useActionFeedback();
   const [view, setView] = useState<TaskView>('onay');
   const pending = store.candidates.filter(
     (candidate) =>
@@ -36,7 +37,12 @@ export function TasksScreen() {
             üretir.
           </p>
         </div>
-        <StatusBadge label={`${pending.length} karar bekliyor`} tone="pending" />
+        <div className="page-actions">
+          <StatusBadge label={`${pending.length} karar bekliyor`} tone="pending" />
+          <Link className="button" to="/gorevler/yeni">
+            + Manuel görev
+          </Link>
+        </div>
       </header>
       {!isLawyer(user.role) && (
         <div className="notice warning">
@@ -97,19 +103,50 @@ export function TasksScreen() {
       {view === 'gorevler' && (
         <div className="stack-sm">
           {tasks.map((task) => (
-            <WorkCard
-              key={task.id}
-              category="Kesin görev"
-              title={task.title}
-              context={store.files.find((file) => file.id === task.fileId)?.name ?? task.fileId}
-              time={`Son tarih: ${task.dueDate ?? 'Belirlenmedi'}`}
-              status={task.status === 'acik' ? 'Açık · görünür kalır' : 'Tamamlandı'}
-              statusTone={task.status === 'acik' ? 'info' : 'success'}
-              owner={owner(task.ownerId)}
-              actionLabel="Dosyayı aç"
-              actionTo={`/dosyalar/${task.fileId}`}
-              tone="info"
-            />
+            <article className="card task-list-card" key={task.id}>
+              <div>
+                <div className="inline-actions">
+                  <StatusBadge
+                    label={task.origin === 'manuel' ? 'Manuel' : 'Adaydan kesinleşti'}
+                    tone={task.origin === 'manuel' ? 'info' : 'candidate'}
+                  />
+                  <StatusBadge
+                    label={task.status === 'acik' ? 'Açık · görünür kalır' : 'Tamamlandı'}
+                    tone={task.status === 'acik' ? 'info' : 'success'}
+                  />
+                </div>
+                <h3>{task.title}</h3>
+                <p className="muted small">
+                  {store.files.find((file) => file.id === task.fileId)?.name ?? task.fileId} ·
+                  Sahip: {owner(task.ownerId)} · Son tarih: {task.dueDate ?? 'Belirlenmedi'}
+                </p>
+                {task.reminderAt && (
+                  <p className="micro muted">Sentetik hatırlatma: {task.reminderAt}</p>
+                )}
+              </div>
+              <div className="stack-sm">
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() =>
+                    feedback.run(
+                      () =>
+                        task.status === 'acik'
+                          ? store.completeTask(task.id)
+                          : store.reopenTask(task.id),
+                      task.status === 'acik'
+                        ? 'Görev tamamlandı işaretlendi.'
+                        : 'Görev yeniden açıldı.',
+                    )
+                  }
+                >
+                  {task.status === 'acik' ? 'Tamamlandı işaretle' : 'Yeniden aç'}
+                </button>
+                <Link className="button secondary" to={`/dosyalar/${task.fileId}`}>
+                  Dosyayı aç
+                </Link>
+              </div>
+            </article>
           ))}
         </div>
       )}
@@ -137,6 +174,125 @@ export function TasksScreen() {
         son kontrol. Süre adayı yalnız ana görev ve kesin takvim kaydı üretir. Sahip ataması
         otomatik değildir.
       </div>
+      {feedback.error && (
+        <div className="notice danger" role="alert">
+          {feedback.error}
+        </div>
+      )}
+      {feedback.message && <SuccessToast message={feedback.message} />}
+    </div>
+  );
+}
+
+export function NewManualTaskScreen() {
+  const store = useStore();
+  const user = currentUser(store);
+  const navigate = useNavigate();
+  const feedback = useActionFeedback();
+  const files = store.files.filter(
+    (file) => file.status !== 'kapali' && canAccessFile(user, file.id),
+  );
+  const owners = store.users.filter((candidate) => candidate.active);
+  const [fileId, setFileId] = useState(files[0]?.id ?? '');
+  const [title, setTitle] = useState('');
+  const [ownerId, setOwnerId] = useState(user.id);
+  const [startDate, setStartDate] = useState(store.settings.simulatedNow.slice(0, 10));
+  const [dueDate, setDueDate] = useState('');
+  const [reminderAt, setReminderAt] = useState('');
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const id = feedback.run(
+      () =>
+        store.createManualTask({
+          fileId,
+          title,
+          ownerId,
+          startDate,
+          dueDate: dueDate || undefined,
+          reminderAt: reminderAt ? `${reminderAt}:00Z` : undefined,
+        }),
+      store.settings.offline
+        ? 'Manuel görev oluşturuldu; senkronizasyon bekliyor.'
+        : 'Manuel görev oluşturuldu.',
+    );
+    if (id) navigate('/gorevler');
+  };
+  return (
+    <div className="stack">
+      <header className="page-header">
+        <div>
+          <span className="eyebrow">Kaynak: kullanıcı · Süre değildir</span>
+          <h1>Manuel görev oluştur</h1>
+          <p>Bu kayıt iş takibi içindir; hukuki deadline oluşturmaz veya dört kapıyı atlamaz.</p>
+        </div>
+        <Link className="button secondary" to="/gorevler">
+          Vazgeç
+        </Link>
+      </header>
+      <form className="card stack" onSubmit={submit} noValidate>
+        <label className="field">
+          <span>Dosya</span>
+          <select required value={fileId} onChange={(event) => setFileId(event.target.value)}>
+            {files.map((file) => (
+              <option value={file.id} key={file.id}>
+                {file.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>Görev başlığı</span>
+          <input required value={title} onChange={(event) => setTitle(event.target.value)} />
+        </label>
+        <div className="grid-2">
+          <label className="field">
+            <span>Sahip</span>
+            <select value={ownerId} onChange={(event) => setOwnerId(event.target.value)}>
+              {owners.map((owner) => (
+                <option value={owner.id} key={owner.id}>
+                  {owner.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Başlangıç</span>
+            <input
+              type="date"
+              required
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Son tarih (isteğe bağlı)</span>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>Hatırlatma zamanı (isteğe bağlı, UTC)</span>
+            <input
+              type="datetime-local"
+              value={reminderAt}
+              onChange={(event) => setReminderAt(event.target.value)}
+            />
+          </label>
+        </div>
+        <div className="notice info">
+          Hatırlatma yalnız içeriksiz yerel bildirim üretir; gerçek e-posta veya dış kanal yoktur.
+        </div>
+        <button className="button" type="submit">
+          Manuel görevi kaydet
+        </button>
+        {feedback.error && (
+          <div className="notice danger" role="alert">
+            {feedback.error}
+          </div>
+        )}
+      </form>
     </div>
   );
 }

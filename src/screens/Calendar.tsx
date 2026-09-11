@@ -67,7 +67,12 @@ export function CalendarScreen() {
             kalır.
           </p>
         </div>
-        <DemoAssumption>Takvim simüle saate göre UTC gösterilir</DemoAssumption>
+        <div className="page-actions">
+          <DemoAssumption>Takvim simüle saate göre UTC gösterilir</DemoAssumption>
+          <Link className="button" to="/takvim/yeni">
+            + Yeni olay / duruşma
+          </Link>
+        </div>
       </header>
       <div className="calendar-month" aria-label={`${monthTitle} aylık takvim`}>
         {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pa'].map((day) => (

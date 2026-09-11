@@ -1,0 +1,94 @@
+.print-preview {
+  width: 100%;
+}
+
+.print-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.a4-sheet {
+  width: min(210mm, 100%);
+  min-height: 297mm;
+  margin: auto;
+  padding: 18mm;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 18px 60px rgba(18, 31, 35, 0.2);
+}
+
+.a4-sheet .muted,
+.a4-sheet .eyebrow {
+  color: #454545;
+}
+
+.a4-sheet__header,
+.a4-sheet__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.a4-sheet__header {
+  margin-bottom: 12mm;
+  padding-bottom: 6mm;
+  border-bottom: 2px solid #1f7078;
+}
+
+.a4-sheet__footer {
+  margin-top: 10mm;
+  padding-top: 5mm;
+  border-top: 1px solid #bbb;
+  font-size: 0.75rem;
+}
+
+.a4-sheet .metric {
+  border-color: #ccc;
+  background: #f5f5f5;
+}
+
+.a4-sheet .data-table th,
+.a4-sheet .data-table td {
+  border-color: #ddd;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    min-width: 0;
+    background: #fff !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-preview,
+  .print-preview * {
+    visibility: visible;
+  }
+
+  .print-preview {
+    position: absolute;
+    inset: 0;
+  }
+
+  .print-toolbar {
+    display: none !important;
+  }
+
+  .a4-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    box-shadow: none;
+  }
+}

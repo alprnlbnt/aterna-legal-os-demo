@@ -11,8 +11,8 @@
 - `npm run format:check` — PASS
 - `npm run typecheck` — PASS
 - `npm run lint` — PASS
-- `npm test` — PASS, 22/22
-- `npm run build` — PASS, 79 modül
+- `npm test` — PASS, 43/43
+- `npm run build` — PASS, 88 modül
 
 ## Tarayıcı testleri
 
@@ -26,7 +26,12 @@
 - Golden path ve güvenlik/ürün sınırları: 8/8 PASS
 - Axe erişilebilirlik ve klavye akışı: 7/7 PASS
 
-- Claude Code / Opus final salt-okunur review: PASS; 0 kritik, 0 yüksek, 0 orta bulgu
+- Önceki temel demo için Claude Code / Opus final review: PASS
+- Back-office genişletmesi için Claude Opus final review: max-turns nedeniyle tamamlanamadı; gerçek kalite kapısı test sonuçları aşağıdadır.
+- Back-office E2E: phone 7/7 PASS, desktop 7/7 PASS
+- Back-office + eski ekranlar a11y: phone 18/18 PASS, desktop 18/18 PASS
+- Eski golden path: phone 8/8 PASS, desktop 8/8 PASS
+- Yeni route runtime smoke: 6/6 route, 0 page error
 
 Tarayıcı testlerinde doğrulanan ana davranışlar:
 

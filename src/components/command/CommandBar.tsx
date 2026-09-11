@@ -7,11 +7,14 @@ const commands = [
   { label: 'Gelen evrakları incele', route: '/gelen', keywords: 'ocr eşleşme' },
   { label: 'Yeni potansiyel dosya aç', route: '/dosyalar/yeni-potansiyel', keywords: 'matter' },
   { label: 'Onay kuyruğunu aç', route: '/gorevler', keywords: 'süre görev' },
+  { label: 'Manuel görev oluştur', route: '/gorevler/yeni', keywords: 'iş hatırlatma' },
   { label: 'Takvimi aç', route: '/takvim', keywords: 'ajanda son gün' },
   { label: 'Yeni belge başlat', route: '/belgeler/yeni', keywords: 'teklif sözleşme rapor' },
   { label: 'Duruşma hazırlığını aç', route: '/durusmalar/durusma-118', keywords: 'sesli not' },
   { label: 'Müvekkilleri ve kişileri aç', route: '/kisiler', keywords: 'kişi' },
-  { label: 'Basit cari ve tahsilatı aç', route: '/finans', keywords: 'para masraf' },
+  { label: 'Finans panosunu aç', route: '/finans', keywords: 'para masraf rapor' },
+  { label: 'Yeni duruşma oluştur', route: '/durusmalar/yeni', keywords: 'takvim olay' },
+  { label: 'Yeni kişi oluştur', route: '/kisiler/yeni', keywords: 'müvekkil aday' },
   { label: 'Demo kontrol panelini aç', route: '/demo', keywords: 'reset persona offline' },
 ];
 

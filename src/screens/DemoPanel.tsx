@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DemoAssumption } from '../components/forms/SourceLabel';
 import { StatusBadge } from '../components/forms/StatusBadge';
 import {
@@ -55,8 +55,9 @@ export function DemoPanelScreen() {
               }
             >
               {store.users.map((user) => (
-                <option value={user.id} key={user.id}>
+                <option value={user.id} key={user.id} disabled={!user.active}>
                   {user.name} · {roleLabel[user.role]}
+                  {user.active ? '' : ' · Pasif'}
                 </option>
               ))}
             </select>
@@ -67,6 +68,12 @@ export function DemoPanelScreen() {
           <p className="small muted">
             Stajyer Ada ile 2024/118 dosyasını açarak hassas alan maskelemesini deneyin.
           </p>
+          {store.users.find((item) => item.id === store.settings.personaId)?.role ===
+            'yonetici_avukat' && (
+            <Link className="button secondary" to="/kullanicilar">
+              Sentetik personaları yönet
+            </Link>
+          )}
         </section>
         <section className="card stack-sm">
           <span className="eyebrow">Bağlantı simülasyonu</span>
